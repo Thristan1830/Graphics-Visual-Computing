@@ -2,5 +2,5 @@
 Files
 
 git innit
-git add.
+git add .
 git commit -m "Name"
