@@ -4,3 +4,4 @@ Files
 # git innit
 # git add .
 # git commit -m "Name"
+# git push origin main
