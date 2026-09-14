@@ -1,7 +1,13 @@
-# Graphics-Visual-Computing
-Files
-# Hello mga tao, lapag nyo na lang mga files nyo dito and if mag eedit kayo isa isa lang para di mabura yung changes nyo na gagawin.(mag sabi kayo sa gc)
-# git innit
-# git add .
-# git commit -m "Name"
-# git push origin main
+# Hello, Welcome to (SIMS) Security Identification and Monitoring System.
+
+# Our Objectives are:
+#  
+
+
+
+# list of members:
+# Mohammed Faissal Undug - Team Leader
+# Mary Rose Sabio - Progress Tracker
+# Jurrien Julianda - Lead Researcher
+# Thristan Flores - File manager
+# John Carlos Corocoto - Design & Tester
