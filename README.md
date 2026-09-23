@@ -13,3 +13,6 @@
 # Jurrien Julianda - Lead Researcher
 # Thristan Flores - File manager
 # John Carlos Corocoto - Design & Tester
+
+# Click link to learn how to operate the app!
+https://docs.google.com/document/d/107O5CX8JuTib8xijqDpGn9QxV85Ypl722Rz5fljtxd4/edit?usp=sharing
