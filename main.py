@@ -92,6 +92,15 @@ while True:
             cv2.putText(frame, f"{cam_name}: OFFLINE", (40, 220), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
         else:
             frame = cv2.resize(frame, (640, 480))
+
+            # 📡 MOBILE/SECONDARY STREAM SIGNAL CONDITIONING: Scrub compression artifacts and
+            # sharpen facial landmark edges before any downstream detection touches the frame.
+            if cam_name.startswith(("GATE 02", "GATE 03", "GATE 04", "GATE 05")):
+                frame = cv2.bilateralFilter(frame, d=9, sigmaColor=75, sigmaSpace=75)
+                laplacian_edges = cv2.Laplacian(frame, cv2.CV_64F)
+                laplacian_edges = cv2.convertScaleAbs(laplacian_edges)
+                frame = cv2.addWeighted(frame, 1.0, laplacian_edges, 0.3, 0)
+
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             # 🚀 SHADOW & LIGHT PROOF ENGINE: Applies CLAHE grid blocks to eliminate environment glare fluctuations!
@@ -161,10 +170,10 @@ while True:
                         general_ceiling = 110.00
                         clean_search_id = int(user_id)
 
-                        # Scale-Aware Rule: If the bounding face width is large (w >= 110), keep a strict 62.00 cap to lock out close relatives.
-                        # If the bounding face width is small (w < 110), broaden the ceiling to 95.00 to capture your far stances and side views flawlessly!
+                        # Scale-Aware Rule: If the bounding face width is large (w >= 110), keep a strict 72.00 cap to lock out close relatives.
+                        # If the bounding face width is small (w < 110), broaden the ceiling to 82.00 to capture side/far stances without opening the door wide.
                         if clean_search_id == 1:
-                            id_ceiling = 62.00 if w >= 110 else 95.00
+                            id_ceiling = 72.00 if w >= 110 else 82.00
                         else:
                             id_ceiling = general_ceiling
 

@@ -25,12 +25,16 @@ def status(tag, message):
 # Path guard checks if we are running inside the repository subfolder
 base_dir = "Graphics-Visual-Computing" if os.path.exists("Graphics-Visual-Computing") else "."
 
+# --- 🚀 INITIALIZE HARDWARE INTERFACE CAMERA ROUTING ---
+# Change this index parameter to 0 for built-in laptop camera, or 1/2 for your Iriun mobile client stream app!
+CAMERA_INDEX = 1
+
 cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 if os.path.exists(os.path.join(base_dir, 'haarcascade_frontalface_default.xml')):
     cascade_path = os.path.join(base_dir, 'haarcascade_frontalface_default.xml')
 
 face_cascade = cv2.CascadeClassifier(cascade_path)
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(CAMERA_INDEX)
 
 dataset_path = os.path.join(base_dir, "dataset")
 os.makedirs(dataset_path, exist_ok=True)
