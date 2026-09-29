@@ -153,9 +153,9 @@ while True:
                         clean_search_id = int(user_id)
 
                         # Scale-Aware Rule: If the bounding face width is large (w >= 110), keep a strict 62.00 cap to lock out close relatives.
-                        # If the bounding face width is small (w < 110), expand the ceiling to 78.00 to capture your side views and far stances smoothly!
+                        # If the bounding face width is small (w < 110), broaden the ceiling to 95.00 to capture your far stances and side views flawlessly!
                         if clean_search_id == 1:
-                            id_ceiling = 62.00 if w >= 110 else 78.00
+                            id_ceiling = 62.00 if w >= 110 else 95.00
                         else:
                             id_ceiling = general_ceiling
 
@@ -186,7 +186,7 @@ while True:
                     except cv2.error:
                         pass
 
-                # --- 👕 UNIFORM COMPLIANCE SCANNER (safe against edge-frame shape errors) ---
+                # --- 👕 UNIFORM COMPLIANCE SCANNER (STRICT HIGH-CONTRAST FILTER) ---
                 try:
                     shirt_y = int(y + h * 1.15)
                     shirt_h = min(479 - shirt_y, int(h * 0.45))
@@ -195,8 +195,10 @@ while True:
 
                     if shirt_h > 5 and shirt_w > 5:
                         shirt_roi_hsv = hsv[shirt_y:shirt_y + shirt_h, shirt_x:shirt_x + shirt_w]
-                        lower_white = np.array([0, 0, 100], dtype="uint8")
-                        upper_white = np.array([180, 80, 255], dtype="uint8")
+
+                        # 👔 Strict White HSV Mask: Narrowed parameters to eliminate false skin/glare triggers
+                        lower_white = np.array([0, 0, 200], dtype="uint8")
+                        upper_white = np.array([180, 30, 255], dtype="uint8")
 
                         white_mask = cv2.inRange(shirt_roi_hsv, lower_white, upper_white)
                         white_pixels = cv2.countNonZero(white_mask)
@@ -204,7 +206,7 @@ while True:
 
                         white_density_score = (white_pixels / total_roi_pixels) * 100 if total_roi_pixels > 0 else 0
 
-                        if white_density_score > 8:
+                        if white_density_score > 12:  # Calibrated filter ceiling
                             uniform_status = "PASSED: WHITE SHIRT"
                             cv2.rectangle(frame, (shirt_x, shirt_y), (shirt_x + shirt_w, shirt_y + shirt_h), (0, 255, 0), 2)
                         else:
@@ -213,11 +215,16 @@ while True:
                 except cv2.error:
                     pass
 
-                # --- 🚨 ACCESS DECISION ROUTER ---
+                # --- 🚨 ACCESS DECISION ROUTER (IRONCLAD LOCKDOWN) ---
                 if uniform_status.startswith("PASSED"):
-                    if current_face_identity != "GUEST":
+                    if current_face_identity == "GUEST" or resolved_identity == "GUEST":
+                        # Secure Guest Routing: Compliant visitor gets a strict ORANGE HUD overlay map
+                        system_status = "GUEST PASSED UNIFORM"
+                        hud_color = (255, 165, 0)
+                    else:
+                        # Secure Student Routing: Only true registered matches wearing white shirts turn solid GREEN!
                         system_status = "ACCESS GRANTED | UNIFORM OK"
-                        hud_color = (0, 255, 0)  # Solid Green for verified student with uniform
+                        hud_color = (0, 255, 0)
 
                         log_key = f"{resolved_identity}_{cam_name}"
                         if log_key not in attendance_log:
@@ -227,21 +234,15 @@ while True:
                                     f"{datetime.datetime.now().strftime('%Y-%m-%d,%H:%M:%S')},"
                                     f"{resolved_identity},{current_face_role},{cam_name},AUTHORIZED_ENTRY\n"
                                 )
-                    else:
-                        system_status = "GUEST PASSED UNIFORM"
-                        hud_color = (255, 165, 0)  # Orange for unknown guest with uniform
                 else:
-                    # 🛡️ THE STRICT UNIFORM & REGISTRATION LOCKOUT ENGINE
-                    if current_face_identity != "GUEST":
-                        # Force a hard RED alert status if an authorized student forgot their white shirt uniform!
-                        system_status = "ACCESS DENIED | NO UNIFORM"
-                        hud_color = (0, 0, 255)  # Vibrant Solid Red for absolute compliance violation
-                    else:
-                        # Standard fallback for completely unregistered/random photo test samples
+                    # 🛡️ THE STRICT UNIFORM & REGISTRATION VIOLATION LOCKOUT ENGINE
+                    if current_face_identity == "GUEST" or resolved_identity == "GUEST":
                         system_status = "GUEST LOCKED OUT"
-                        hud_color = (255, 165, 0)  # Standard Orange for anonymous guest layout tracker
-                        resolved_identity = "GUEST"
-                        current_face_role = "Guest"
+                        hud_color = (255, 165, 0)  # Non-compliant guest stays standard orange
+                    else:
+                        # Registered student missing their white uniform shirt triggers a hard solid RED warning!
+                        system_status = "ACCESS DENIED | NO UNIFORM"
+                        hud_color = (0, 0, 255)
 
                 # --- 🖥️ SINGLE CLEAN HUD RENDER (one block, no duplicated text) ---
                 cv2.putText(frame, f"ID: {resolved_identity.upper()}", (x, y - 45),
