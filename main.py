@@ -196,9 +196,9 @@ while True:
                     if shirt_h > 5 and shirt_w > 5:
                         shirt_roi_hsv = hsv[shirt_y:shirt_y + shirt_h, shirt_x:shirt_x + shirt_w]
 
-                        # 👔 Strict White HSV Mask: Narrowed parameters to eliminate false skin/glare triggers
-                        lower_white = np.array([0, 0, 200], dtype="uint8")
-                        upper_white = np.array([180, 30, 255], dtype="uint8")
+                        # 👔 Calibrated White HSV Mask: Open brightness floor to absorb room shadows safely!
+                        lower_white = np.array([0, 0, 140], dtype="uint8")
+                        upper_white = np.array([180, 40, 255], dtype="uint8")
 
                         white_mask = cv2.inRange(shirt_roi_hsv, lower_white, upper_white)
                         white_pixels = cv2.countNonZero(white_mask)
@@ -206,7 +206,7 @@ while True:
 
                         white_density_score = (white_pixels / total_roi_pixels) * 100 if total_roi_pixels > 0 else 0
 
-                        if white_density_score > 12:  # Calibrated filter ceiling
+                        if white_density_score > 10:  # Perfectly balanced passing threshold
                             uniform_status = "PASSED: WHITE SHIRT"
                             cv2.rectangle(frame, (shirt_x, shirt_y), (shirt_x + shirt_w, shirt_y + shirt_h), (0, 255, 0), 2)
                         else:
