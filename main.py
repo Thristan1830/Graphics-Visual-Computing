@@ -10,11 +10,14 @@ current_day = datetime.datetime.now().strftime("%A")
 # --- 🚀 INITIALIZATION ZONE ---
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+profile_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_profileface.xml')
 
 if face_cascade.empty() and os.path.exists('haarcascade_frontalface_default.xml'):
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 if eye_cascade.empty() and os.path.exists('haarcascade_eye.xml'):
     eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
+if profile_cascade.empty() and os.path.exists('haarcascade_profileface.xml'):
+    profile_cascade = cv2.CascadeClassifier('haarcascade_profileface.xml')
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 # 🚀 Strict Subfolder Rule: Directs the tracker straight to your active trained brain weights!
@@ -105,7 +108,13 @@ while True:
             for (x, y, w, h) in faces:
                 detection_targets.append((x, y, w, h, False))
 
+            # 🚀 SIDE-VIEW PROFILE FALLBACK VALVE: Tracks side faces natively if front view tracking is dropped!
             if len(faces) == 0:
+                profiles = profile_cascade.detectMultiScale(equalized_gray, scaleFactor=1.12, minNeighbors=6, minSize=(50, 50))
+                for (px, py, pw, ph) in profiles:
+                    detection_targets.append((px, py, pw, ph, False))
+
+            if len(faces) == 0 and len(detection_targets) == 0:
                 for (ex, ey, ew, eh) in eye_pairs:
                     fx = max(0, ex - int(ew * 0.2))
                     fy = max(0, ey - int(eh * 0.4))
